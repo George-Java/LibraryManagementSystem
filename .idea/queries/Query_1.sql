@@ -1,0 +1,7 @@
+SHOW DATABASES;
+
+USE logindemo;
+
+SHOW TABLES;
+
+SELECT *FROM users;

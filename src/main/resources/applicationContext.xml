@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <context:component-scan base-package="com.wsy"/>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/library?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+        <property name="initialSize" value="5"/>
+        <property name="maxActive" value="20"/>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath:mappers/*.xml"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wsy.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    <bean id="main" class="com.wsy.main.Main"/>
+    <bean id="auxiliaryTools" class="com.wsy.auxiliary.AuxiliaryTools"/>
+    <bean id="bookAdditionIFrame" class="com.wsy.iframe.BookAdditionIFrame">
+        <property name="bookInfoMapper" ref="bookInfoMapper"/>
+        <property name="bookTypeMapper" ref="bookTypeMapper"/>
+        <property name="stockpileMapper" ref="stockpileMapper"/>
+    </bean>
+    <bean id="bookUpdateIFrame" class="com.wsy.iframe.BookUpdateIFrame">
+        <property name="bookInfoMapper" ref="bookInfoMapper"/>
+        <property name="bookTypeMapper" ref="bookTypeMapper"/>
+    </bean>
+    <bean id="bookBorrowingIFrame" class="com.wsy.iframe.BookBorrowingIFrame">
+        <property name="borrowMapper" ref="borrowMapper"/>
+        <property name="bookInfoMapper" ref="bookInfoMapper"/>
+        <property name="readerMapper" ref="readerMapper"/>
+        <property name="operatorMapper" ref="operatorMapper"/>
+        <property name="stockpileMapper" ref="stockpileMapper"/>
+    </bean>
+    <bean id="bookReturnIFrame" class="com.wsy.iframe.BookReturnIFrame">
+        <property name="borrowMapper" ref="borrowMapper"/>
+        <property name="operatorMapper" ref="operatorMapper"/>
+    </bean>
+    <bean id="bookSearchIFrame" class="com.wsy.iframe.BookSearchIFrame">
+        <property name="bookInfoMapper" ref="bookInfoMapper"/>
+    </bean>
+    <bean id="bookOrderingIFrame" class="com.wsy.iframe.BookOrderingIFrame">
+        <property name="bookTypeMapper" ref="bookTypeMapper"/>
+        <property name="orderMapper" ref="orderMapper"/>
+        <property name="bookInfoMapper" ref="bookInfoMapper"/>
+        <property name="operatorMapper" ref="operatorMapper"/>
+        <property name="stockpileMapper" ref="stockpileMapper"/>
+    </bean>
+    <bean id="bookAcceptanceIFrame" class="com.wsy.iframe.BookAcceptanceIFrame">
+        <property name="orderMapper" ref="orderMapper"/>
+        <property name="stockpileMapper" ref="stockpileMapper"/>
+    </bean>
+    <bean id="bookCategoryAddIFrame" class="com.wsy.iframe.BookCategoryAddIFrame">
+        <property name="bookTypeMapper" ref="bookTypeMapper"/>
+    </bean>
+    <bean id="bookCategoryUpdateIFrame" class="com.wsy.iframe.BookCategoryUpdateIFrame">
+        <property name="bookTypeMapper" ref="bookTypeMapper"/>
+    </bean>
+    <bean id="readerAddIFrame" class="com.wsy.iframe.ReaderAddIFrame">
+        <property name="readerMapper" ref="readerMapper"/>
+    </bean>
+    <bean id="readerUpdateIFrame" class="com.wsy.iframe.ReaderUpdateIFrame">
+        <property name="readerMapper" ref="readerMapper"/>
+    </bean>
+    <bean id="userAdditionIFrame" class="com.wsy.iframe.UserAdditionIFrame">
+        <property name="operatorMapper" ref="operatorMapper"/>
+    </bean>
+    <bean id="userUpdateIFrame" class="com.wsy.iframe.UserUpdateIFrame">
+        <property name="operatorMapper" ref="operatorMapper"/>
+    </bean>
+    <bean id="passwordChangeIFrame" class="com.wsy.iframe.PasswordChangeIFrame">
+        <property name="operatorMapper" ref="operatorMapper"/>
+    </bean>
+</beans>
