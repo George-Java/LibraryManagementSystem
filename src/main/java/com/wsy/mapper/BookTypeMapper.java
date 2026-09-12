@@ -11,13 +11,13 @@ import com.wsy.model.BookType;
 public interface BookTypeMapper {
     List<BookType> selectAll();
 
-    BookType selectByNumber(String number);
+    BookType selectByNumber(@Param("number") String number);
 
-    BookType selectByTypeName(String typeName);
+    BookType selectByTypeName(@Param("typeName") String typeName);
 
-    List<BookType> selectByKeyword(String keyword);
+    List<BookType> selectByKeyword(@Param("keyword") String keyword);
 
-    int countBooksByType(String number);
+    int countBooksByType(@Param("number") String number);
 
     int insert(BookType bookType);
 
@@ -27,7 +27,7 @@ public interface BookTypeMapper {
 
     int updateTypeName(@Param("number") String number, @Param("typeName") String typeName);
 
-    int deleteByNumber(String number);
+    int deleteByNumber(@Param("number") String number);
 
     int updateBookCategory(@Param("oldNumber") String oldNumber, @Param("newNumber") String newNumber);
 }

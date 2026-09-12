@@ -10,19 +10,19 @@ import java.util.List;
 public interface StockpileMapper {
     List<Stockpile> selectAll();
 
-    Stockpile selectByBookId(Integer bookId);
+    Stockpile selectByBookId(@Param("bookISBN") String bookISBN);
 
-    Stockpile selectByBarcode(String barcode);
+    Stockpile selectByBarcode(@Param("barcode") String barcode);
 
     int insert(Stockpile stockpile);
 
     int update(Stockpile stockpile);
 
-    int delete(Integer id);
+    int delete(@Param("bookISBN") String bookISBN);
 
-    int deleteByBookId(Integer bookId);
+    int deleteByBookId(@Param("bookISBN") String bookISBN);
 
-    Stockpile selectByBookISBN(String bookISBN);
+    Stockpile selectByBookISBN(@Param("bookISBN") String bookISBN);
 
     int updateStockByBookISBN(@Param("bookISBN") String bookISBN, @Param("quantity") Integer quantity);
 }

@@ -1,75 +1,47 @@
 package com.wsy.iframe;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
+
+import com.wsy.main.Main;
+import com.wsy.mapper.*;
+import com.wsy.model.Borrow;
+import com.wsy.model.Stockpile;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-import javax.swing.JButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableModel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+
 import static com.wsy.auxiliary.AuxiliaryTools.createLabel;
 import static com.wsy.auxiliary.AuxiliaryTools.createText;
-import com.wsy.main.Main;
-import com.wsy.mapper.BookInfoMapper;
-import com.wsy.mapper.BorrowMapper;
-import com.wsy.mapper.OperatorMapper;
-import com.wsy.mapper.ReaderMapper;
-import com.wsy.mapper.StockpileMapper;
-import com.wsy.model.Borrow;
-import com.wsy.model.Stockpile;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookBorrowingIFrame {
     private DefaultTableModel tableModel;
     private final List<JTextField> topTextFields = new ArrayList<>();
     private JTextField operatorField;
-    private final Map<String, String> operatorMap = new HashMap<>(); 
-    private boolean isShowingBorrowRecords = false; 
+    private final Map<String, String> operatorMap = new HashMap<>();
+    private boolean isShowingBorrowRecords = false;
     private JInternalFrame currentFrame;
     private JScrollPane currentCenterPanel;
-    @Autowired
-    private BorrowMapper borrowMapper;
-    @Autowired
-    private BookInfoMapper bookInfoMapper;
-    @Autowired
-    private OperatorMapper operatorMapper;
-    @Autowired
-    private StockpileMapper stockpileMapper;
-    @Autowired
-    private ReaderMapper readerMapper;
-    public void setBorrowMapper(BorrowMapper borrowMapper) {
-        this.borrowMapper = borrowMapper;
-    }
-    public void setBookInfoMapper(BookInfoMapper bookInfoMapper) {
-        this.bookInfoMapper = bookInfoMapper;
-    }
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
-    public void setStockpileMapper(StockpileMapper stockpileMapper) {
-        this.stockpileMapper = stockpileMapper;
-    }
-    public void setReaderMapper(ReaderMapper readerMapper) {
-        this.readerMapper = readerMapper;
-    }
+
+    private final BorrowMapper borrowMapper;
+    private final BookInfoMapper bookInfoMapper;
+    private final OperatorMapper operatorMapper;
+    private final StockpileMapper stockpileMapper;
+    private final ReaderMapper readerMapper;
+
     public JInternalFrame createBookBorrowIFrame() throws PropertyVetoException {
         JInternalFrame frame = new JInternalFrame("图书借阅", true, true, true, true);
         frame.setSize(800, 500);
@@ -171,22 +143,25 @@ public class BookBorrowingIFrame {
         frame.setVisible(true);
         return frame;
     }
+
     private String getDefaultOperatorName() {
         try {
             if (Main.currentOperator != null) {
                 return Main.currentOperator.getUserName();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("加载操作员信息失败", e);
         }
-        return "管理员"; 
+        return "管理员";
     }
+
     private void loadOperatorMap() throws Exception {
         List<com.wsy.model.Operator> operators = operatorMapper.selectAll();
         for (com.wsy.model.Operator operator : operators) {
             operatorMap.put(operator.getUserName(), String.valueOf(operator.getId()));
         }
     }
+
     private void fetchAdditionalInfo(JInternalFrame frame, String type, String value) {
         if (value == null || value.trim().isEmpty()) return;
         try {
@@ -199,6 +174,7 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(frame, "数据查询失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void fetchReaderInfo(String readerNumber) {
         com.wsy.model.Reader reader = readerMapper.selectByBarcode(readerNumber);
         if (reader != null) {
@@ -208,14 +184,15 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(null, "未找到读者信息", "提示", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
     private void fetchBookInfo(String bookISBN) {
         Map<String, Object> bookDetail = bookInfoMapper.selectBookDetailByISBN(bookISBN);
         if (bookDetail != null) {
-            topTextFields.get(3).setText((String) bookDetail.get("bookname")); 
-            topTextFields.get(5).setText((String) bookDetail.get("category")); 
+            topTextFields.get(3).setText((String) bookDetail.get("bookname"));
+            topTextFields.get(5).setText((String) bookDetail.get("category"));
             double price = (double) bookDetail.get("price");
-            topTextFields.get(7).setText(String.format("%.2f", price)); 
-            topTextFields.get(6).setText(String.format("%.2f", price * 0.1)); 
+            topTextFields.get(7).setText(String.format("%.2f", price));
+            topTextFields.get(6).setText(String.format("%.2f", price * 0.1));
             Integer stock = (Integer) bookDetail.get("stockQuantity");
             if (stock == null) {
                 topTextFields.get(4).setText("0");
@@ -227,13 +204,15 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(null, "未找到图书信息", "提示", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
     private void resetBookFields() {
-        topTextFields.get(3).setText(""); 
-        topTextFields.get(4).setText(""); 
-        topTextFields.get(5).setText(""); 
-        topTextFields.get(6).setText(""); 
-        topTextFields.get(7).setText(""); 
+        topTextFields.get(3).setText("");
+        topTextFields.get(4).setText("");
+        topTextFields.get(5).setText("");
+        topTextFields.get(6).setText("");
+        topTextFields.get(7).setText("");
     }
+
     private void loadBorrowRecords(JScrollPane panelCenter, JInternalFrame frame) {
         try {
             JPanel tablePanel = new JPanel(new BorderLayout());
@@ -264,7 +243,7 @@ public class BookBorrowingIFrame {
             tableModel = new DefaultTableModel(rowData, columnNames) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return false; 
+                    return false;
                 }
             };
             JTable table = new JTable(tableModel);
@@ -274,6 +253,7 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(frame, "加载借阅记录失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void borrowBook(JInternalFrame frame) {
         String readerNumber = topTextFields.get(0).getText();
         String bookISBN = topTextFields.get(1).getText();
@@ -316,8 +296,9 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(frame, "借阅失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     @Transactional(rollbackFor = Exception.class)
-    private void performBorrowOperation(String readerNumber, String bookISBN, int operatorId, int newStock) {
+    protected void performBorrowOperation(String readerNumber, String bookISBN, int operatorId, int newStock) {
         Borrow borrow = new Borrow();
         borrow.setReaderNumber(readerNumber);
         borrow.setBookISBN(bookISBN);
@@ -336,6 +317,7 @@ public class BookBorrowingIFrame {
             stockpileMapper.insert(stockpile);
         }
     }
+
     private void loadAvailableBooks(JScrollPane panelCenter, JInternalFrame frame) {
         try {
             JPanel tablePanel = new JPanel(new BorderLayout());
@@ -370,7 +352,7 @@ public class BookBorrowingIFrame {
             tableModel = new DefaultTableModel(rowData, columnNames) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return false; 
+                    return false;
                 }
             };
             JTable table = new JTable(tableModel);
@@ -378,17 +360,17 @@ public class BookBorrowingIFrame {
                 if (!e.getValueIsAdjusting()) {
                     int selectedRow = table.getSelectedRow();
                     if (selectedRow != -1) {
-                        String bookISBN = (String) table.getValueAt(selectedRow, 0); 
-                        String category = (String) table.getValueAt(selectedRow, 1); 
-                        String bookname = (String) table.getValueAt(selectedRow, 2); 
-                        Double price = (Double) table.getValueAt(selectedRow, 6); 
-                        Integer stockQuantity = (Integer) table.getValueAt(selectedRow, 7); 
-                        topTextFields.get(1).setText(bookISBN); 
-                        topTextFields.get(3).setText(bookname); 
-                        topTextFields.get(5).setText(category); 
-                        topTextFields.get(7).setText(String.format("%.2f", price)); 
-                        topTextFields.get(4).setText(String.valueOf(stockQuantity)); 
-                        topTextFields.get(6).setText(String.format("%.2f", price * 0.1)); 
+                        String bookISBN = (String) table.getValueAt(selectedRow, 0);
+                        String category = (String) table.getValueAt(selectedRow, 1);
+                        String bookname = (String) table.getValueAt(selectedRow, 2);
+                        Double price = (Double) table.getValueAt(selectedRow, 6);
+                        Integer stockQuantity = (Integer) table.getValueAt(selectedRow, 7);
+                        topTextFields.get(1).setText(bookISBN);
+                        topTextFields.get(3).setText(bookname);
+                        topTextFields.get(5).setText(category);
+                        topTextFields.get(7).setText(String.format("%.2f", price));
+                        topTextFields.get(4).setText(String.valueOf(stockQuantity));
+                        topTextFields.get(6).setText(String.format("%.2f", price * 0.1));
                     }
                 }
             });
@@ -398,11 +380,13 @@ public class BookBorrowingIFrame {
             JOptionPane.showMessageDialog(frame, "加载图书信息失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private JButton createButton(String label) {
         JButton button = new JButton(label);
         button.setSize(80, 40);
         return button;
     }
+
     private void clearTableData(JInternalFrame frame) {
         if (tableModel != null) {
             int confirm = JOptionPane.showConfirmDialog(

@@ -1,7 +1,18 @@
 package com.wsy.iframe;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+
+import com.wsy.auxiliary.JImageView;
+import com.wsy.mapper.BookInfoMapper;
+import com.wsy.mapper.BookTypeMapper;
+import com.wsy.mapper.StockpileMapper;
+import com.wsy.model.BookInfo;
+import com.wsy.model.BookType;
+import com.wsy.model.Stockpile;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
@@ -13,45 +24,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JComboBox;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
+import static com.wsy.auxiliary.AuxiliaryTools.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static com.wsy.auxiliary.AuxiliaryTools.createButtons;
-import static com.wsy.auxiliary.AuxiliaryTools.createComboBox;
-import static com.wsy.auxiliary.AuxiliaryTools.createLabel;
-import static com.wsy.auxiliary.AuxiliaryTools.createText;
-import com.wsy.auxiliary.JImageView;
-import com.wsy.mapper.BookInfoMapper;
-import com.wsy.mapper.BookTypeMapper;
-import com.wsy.mapper.StockpileMapper;
-import com.wsy.model.BookInfo;
-import com.wsy.model.BookType;
-import com.wsy.model.Stockpile;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookAdditionIFrame {
-    @Autowired
-    private BookInfoMapper bookInfoMapper;
-    @Autowired
-    private BookTypeMapper bookTypeMapper;
-    @Autowired
-    private StockpileMapper stockpileMapper;
-    public void setBookInfoMapper(BookInfoMapper bookInfoMapper) {
-        this.bookInfoMapper = bookInfoMapper;
-    }
-    public void setBookTypeMapper(BookTypeMapper bookTypeMapper) {
-        this.bookTypeMapper = bookTypeMapper;
-    }
-    public void setStockpileMapper(StockpileMapper stockpileMapper) {
-        this.stockpileMapper = stockpileMapper;
-    }
+    private final BookInfoMapper bookInfoMapper;
+    private final BookTypeMapper bookTypeMapper;
+    private final StockpileMapper stockpileMapper;
+
     private final List<java.awt.Component> inputComponents = new ArrayList<>();
     private final Map<String, String> categoryMap = new HashMap<>();
     private final Map<String, String> publisherMap = new HashMap<>();
+
     public JInternalFrame createAddBookIFrame() throws PropertyVetoException {
         inputComponents.clear();
         loadCategoriesAndPublishers();
@@ -62,7 +48,7 @@ public class BookAdditionIFrame {
         frame.setMaximum(true); // 设置默认最大化显示
         // 创建图片面板
         JImageView panelTop = new JImageView("./res/bookAdditon.jpeg");
-        
+
         // 创建输入控件面板
         JPanel panelCenter = new JPanel();
         panelCenter.setLayout(new GridLayout(4, 4, 10, 10));
@@ -71,21 +57,21 @@ public class BookAdditionIFrame {
         String[] publisherNames = publisherMap.keySet().toArray(new String[0]);
         for (int i = 0; i < 8; i++) {
             panelCenter.add(createLabel(addBookLabels[i]));
-            if (i == 1) { 
+            if (i == 1) {
                 JComboBox<String> comboBox = createComboBox(bookCategoryNames);
                 panelCenter.add(comboBox);
                 inputComponents.add(comboBox);
-            } else if (i == 4) { 
+            } else if (i == 4) {
                 JComboBox<String> comboBox = createComboBox(publisherNames, true);
                 panelCenter.add(comboBox);
                 inputComponents.add(comboBox);
-            } else { 
+            } else {
                 JTextField textField = createText();
                 panelCenter.add(textField);
                 inputComponents.add(textField);
             }
         }
-        
+
         // 创建按钮面板
         JPanel panelBottom = createButtons("添加", "关闭");
         panelBottom.setPreferredSize(new Dimension(0, 40));
@@ -94,7 +80,7 @@ public class BookAdditionIFrame {
             public void mouseClicked(MouseEvent e) {
                 String bookISBN = getComponentValue(0);
                 String bookname = getComponentValue(2);
-                if (bookISBN == null || bookISBN.trim().isEmpty()) {
+                if (bookISBN.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "图书ISBN不能为空", "错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -102,7 +88,7 @@ public class BookAdditionIFrame {
                     JOptionPane.showMessageDialog(frame, "图书ISBN必须为13位", "错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (bookname == null || bookname.trim().isEmpty()) {
+                if (bookname.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "书名不能为空", "错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -119,13 +105,13 @@ public class BookAdditionIFrame {
                 String publisherDisplay = values[4];
                 String actualPublisher = publisherMap.get(publisherDisplay);
                 if (actualPublisher == null) {
-                    actualPublisher = publisherDisplay; 
+                    actualPublisher = publisherDisplay;
                 }
                 values[4] = actualPublisher;
                 if (addBookToDatabase(bookISBN, categoryCode, values)) {
                     JOptionPane.showMessageDialog(frame, "图书添加成功！");
-                    clearForm(); 
-                    frame.requestFocus(); 
+                    clearForm();
+                    frame.requestFocus();
                 } else {
                     JOptionPane.showMessageDialog(frame, "添加图书失败，请重试", "错误", JOptionPane.ERROR_MESSAGE);
                 }
@@ -134,21 +120,21 @@ public class BookAdditionIFrame {
         panelBottom.getComponent(1).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                frame.dispose(); 
+                frame.dispose();
             }
         });
-        
+
         // 创建下方面板（输入控件 + 按钮）
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.add(panelCenter, BorderLayout.CENTER);
         bottomPanel.add(panelBottom, BorderLayout.SOUTH);
-        
+
         // 使用JSplitPane替代BorderLayout，实现可调整比例的布局
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelTop, bottomPanel);
         splitPane.setResizeWeight(0.6); // 设置调整比例，图片部分优先分配空间
         splitPane.setOneTouchExpandable(true); // 显示快速调整按钮
         splitPane.setContinuousLayout(true); // 调整时实时重绘
-        
+
         // 显式设置初始分割位置，确保图片部分占窗口高度的3/5
         frame.add(splitPane, BorderLayout.CENTER);
         frame.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -164,6 +150,7 @@ public class BookAdditionIFrame {
         frame.setVisible(true);
         return frame;
     }
+
     private void loadCategoriesAndPublishers() {
         try {
             List<BookType> bookTypes = bookTypeMapper.selectAll();
@@ -186,7 +173,7 @@ public class BookAdditionIFrame {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load book categories and publishers", e);
             categoryMap.put("计算机", "TP0001");
             categoryMap.put("文学", "I00001");
             categoryMap.put("数理化", "O00001");
@@ -198,6 +185,7 @@ public class BookAdditionIFrame {
             publisherMap.put("高等教育出版社", "高等教育出版社");
         }
     }
+
     private String getComponentValue(int index) {
         java.awt.Component comp = inputComponents.get(index);
         String value = "";
@@ -209,6 +197,7 @@ public class BookAdditionIFrame {
         }
         return value != null ? value.trim() : "";
     }
+
     private boolean addBookToDatabase(String bookISBN, String categoryCode, String[] values) {
         try {
             BookInfo bookInfo = new BookInfo();
@@ -236,10 +225,11 @@ public class BookAdditionIFrame {
             JOptionPane.showMessageDialog(null, "单价必须是有效数字", "错误", JOptionPane.ERROR_MESSAGE);
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            if (e.getMessage().contains("Duplicate entry") && e.getMessage().contains("bookISBN")) {
+            log.error("Failed to add book to database", e);
+            String message = e.getMessage() == null ? "" : e.getMessage();
+            if (message.contains("Duplicate entry") && message.contains("bookISBN")) {
                 JOptionPane.showMessageDialog(null, "图书ISBN已存在", "错误", JOptionPane.ERROR_MESSAGE);
-            } else if (e.getMessage().contains("cannot be null")) {
+            } else if (message.contains("cannot be null")) {
                 JOptionPane.showMessageDialog(null, "缺少必填字段", "错误", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(null, "数据库错误: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
@@ -247,6 +237,7 @@ public class BookAdditionIFrame {
             return false;
         }
     }
+
     private void clearForm() {
         for (java.awt.Component comp : inputComponents) {
             if (comp instanceof JTextField) {

@@ -20,17 +20,18 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wsy.mapper.BookTypeMapper;
 import com.wsy.model.BookType;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookCategoryAddIFrame {
-    @Autowired
-    private BookTypeMapper bookTypeMapper;
-    public void setBookTypeMapper(BookTypeMapper bookTypeMapper) {
-        this.bookTypeMapper = bookTypeMapper;
-    }
+    private final BookTypeMapper bookTypeMapper;
     private JTextField categoryIdField, categoryNameField;
     private JSpinner daysSpinner, fineSpinner;
     private JInternalFrame frame;
@@ -182,7 +183,7 @@ public class BookCategoryAddIFrame {
                 showError("添加失败，请重试！");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("添加图书类别失败", ex);
             showError("添加失败: " + ex.getMessage());
         }
     }

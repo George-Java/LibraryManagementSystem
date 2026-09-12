@@ -27,17 +27,18 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import static com.wsy.auxiliary.AuxiliaryTools.createText;
 import com.wsy.mapper.OperatorMapper;
 import com.wsy.model.Operator;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class UserAdditionIFrame {
-    @Autowired
-    private OperatorMapper operatorMapper;
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
+    private final OperatorMapper operatorMapper;
     private JTextField nameField, ageField, phoneField, idCardField;
     private JPasswordField pwdField, confirmPwdField;
     private JComboBox<String> genderComboBox;

@@ -6,6 +6,8 @@ import com.wsy.mapper.OperatorMapper;
 import com.wsy.model.Operator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +18,8 @@ import java.util.Objects;
 
 import static com.wsy.auxiliary.AuxiliaryTools.*;
 
+@Component
+@Slf4j
 public class Main {
     private JFrame home;
     private JPanel mainPanel;
@@ -66,7 +70,7 @@ public class Main {
         try {
             internalFrame.setSelected(true);
         } catch (PropertyVetoException e) {
-            e.printStackTrace();
+            log.error("Unable to select internal frame", e);
         }
     }
 
@@ -174,7 +178,7 @@ public class Main {
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(home, "登录失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                log.error("Login failed", ex);
             }
         });
         addClickListener(panelBottom.getComponent(1), () -> {
@@ -337,7 +341,7 @@ public class Main {
                 try {
                     background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("res/Main.png")));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to load main background image", e);
                 }
             }
 

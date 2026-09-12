@@ -22,16 +22,17 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import com.wsy.mapper.ReaderMapper;
 import com.wsy.model.Reader;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class ReaderUpdateIFrame {
-    @Autowired
-    private ReaderMapper readerMapper;
-    public void setReaderMapper(ReaderMapper readerMapper) {
-        this.readerMapper = readerMapper;
-    }
+    private final ReaderMapper readerMapper;
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private JTable readerTable;
     private DefaultTableModel tableModel;
@@ -261,7 +262,7 @@ public class ReaderUpdateIFrame {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "加载读者数据失败: " + ex.getMessage(),
                     "数据库错误", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            log.error("加载读者数据失败", ex);
         }
     }
     private void loadRowToForm(int rowIndex) {
@@ -404,7 +405,7 @@ public class ReaderUpdateIFrame {
         }
         JOptionPane.showMessageDialog(frame, errorMsg,
                 "数据库错误", JOptionPane.ERROR_MESSAGE);
-        ex.printStackTrace();
+        log.error("读者数据库操作失败", ex);
     }
     private JPanel createButtons(String... labels) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));

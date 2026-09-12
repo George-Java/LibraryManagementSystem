@@ -29,18 +29,19 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.wsy.auxiliary.AuxiliaryTools.createText;
 import com.wsy.mapper.BookTypeMapper;
 import com.wsy.model.BookType;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookCategoryUpdateIFrame {
-    @Autowired
-    private BookTypeMapper bookTypeMapper;
-    public void setBookTypeMapper(BookTypeMapper bookTypeMapper) {
-        this.bookTypeMapper = bookTypeMapper;
-    }
+    private final BookTypeMapper bookTypeMapper;
     private JTable categoryTable;
     private DefaultTableModel tableModel;
     private JTextField categoryIdField, categoryNameField;
@@ -381,7 +382,7 @@ public class BookCategoryUpdateIFrame {
             }
         } catch (Exception e) {
             showError("更新类别失败: " + e.getMessage());
-            e.printStackTrace();
+            log.error("更新图书类别失败", e);
         }
     }
     @Transactional(rollbackFor = Exception.class)

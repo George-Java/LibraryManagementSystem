@@ -10,13 +10,13 @@ import java.util.List;
 public interface BorrowMapper {
     List<Borrow> selectAll();
 
-    Borrow selectById(Integer id);
+    Borrow selectById(@Param("id") Integer id);
 
     int insert(Borrow borrow);
 
     int update(Borrow borrow);
 
-    int delete(Integer id);
+    int delete(@Param("id") Integer id);
 
     List<java.util.Map<String, Object>> selectBorrowDetails(@Param("readerNumber") String readerNumber);
 

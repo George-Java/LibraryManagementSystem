@@ -20,7 +20,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import static com.wsy.auxiliary.AuxiliaryTools.addClickListener;
 import static com.wsy.auxiliary.AuxiliaryTools.createButtons;
@@ -32,6 +34,9 @@ import com.wsy.mapper.BookInfoMapper;
 import com.wsy.mapper.BookTypeMapper;
 import com.wsy.model.BookInfo;
 import com.wsy.model.BookType;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookUpdateIFrame {
     private static final ArrayList<java.awt.Component> components = new ArrayList<>();
     private static String selectedBookISBN = null; 
@@ -40,16 +45,8 @@ public class BookUpdateIFrame {
     private final Map<String, String> categoryMap = new HashMap<>(); 
     private final Map<String, String> reverseCategoryMap = new HashMap<>(); 
     private final ArrayList<String> publisherList = new ArrayList<>(); 
-    @Autowired
-    private BookInfoMapper bookInfoMapper;
-    @Autowired
-    private BookTypeMapper bookTypeMapper;
-    public void setBookInfoMapper(BookInfoMapper bookInfoMapper) {
-        this.bookInfoMapper = bookInfoMapper;
-    }
-    public void setBookTypeMapper(BookTypeMapper bookTypeMapper) {
-        this.bookTypeMapper = bookTypeMapper;
-    }
+    private final BookInfoMapper bookInfoMapper;
+    private final BookTypeMapper bookTypeMapper;
     public JInternalFrame createBookUpdateIFrame() throws IOException, PropertyVetoException {
         frame = new JInternalFrame("图书信息修改", true, true, true, true);
         frame.setSize(800, 450);
@@ -179,7 +176,7 @@ public class BookUpdateIFrame {
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(frame, "单价必须是有效数字", "错误", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("修改图书失败", e);
                 JOptionPane.showMessageDialog(frame, "修改失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
@@ -206,7 +203,7 @@ public class BookUpdateIFrame {
                         JOptionPane.showMessageDialog(frame, "删除失败，未找到该图书");
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.error("删除图书失败", ex);
                     JOptionPane.showMessageDialog(
                             frame,
                             "删除失败: " + ex.getMessage(),
@@ -251,7 +248,7 @@ public class BookUpdateIFrame {
                 return book.getCategory();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("加载图书分类失败", e);
         }
         return null;
     }
@@ -308,7 +305,7 @@ public class BookUpdateIFrame {
             frame.revalidate();
             frame.repaint();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("更新图书失败", ex);
             JOptionPane.showMessageDialog(
                     frame,
                     "刷新表格失败: " + ex.getMessage(),

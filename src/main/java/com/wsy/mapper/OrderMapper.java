@@ -12,17 +12,18 @@ import java.util.Map;
 public interface OrderMapper {
     List<Order> selectAll();
 
-    Order selectById(Integer id);
+    Order selectById(@Param("id") Integer id);
 
-    List<Order> selectByBookId(Integer bookId);
+    /** Orders are keyed by the book ISBN (tb_order.bookISBN CHAR(13)). */
+    List<Order> selectByBookId(@Param("bookId") String bookId);
 
-    List<Order> selectByOperatorId(Integer operatorId);
+    List<Order> selectByOperatorId(@Param("operatorId") Integer operatorId);
 
     int insert(Order order);
 
     int update(Order order);
 
-    int delete(Integer id);
+    int delete(@Param("id") Integer id);
 
     List<Map<String, Object>> selectUnacceptedOrders();
 

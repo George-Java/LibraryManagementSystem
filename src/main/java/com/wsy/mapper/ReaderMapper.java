@@ -2,6 +2,7 @@ package com.wsy.mapper;
 
 import com.wsy.model.Reader;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -9,13 +10,13 @@ import java.util.List;
 public interface ReaderMapper {
     List<Reader> selectAll();
 
-    Reader selectByBarcode(String barcode);
+    Reader selectByBarcode(@Param("barcode") String barcode);
 
-    Reader selectByIdentityCard(String identityCard);
+    Reader selectByIdentityCard(@Param("identityCard") String identityCard);
 
     int insert(Reader reader);
 
     int update(Reader reader);
 
-    int deleteByBarcode(String barcode);
+    int deleteByBarcode(@Param("barcode") String barcode);
 }

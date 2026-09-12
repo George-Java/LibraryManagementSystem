@@ -24,13 +24,14 @@ import javax.swing.border.EmptyBorder;
 import com.wsy.main.Main;
 import com.wsy.mapper.OperatorMapper;
 import com.wsy.model.Operator;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class PasswordChangeIFrame {
-    @Autowired
-    private OperatorMapper operatorMapper;
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
+    private final OperatorMapper operatorMapper;
     private static JPasswordField oldPasswordField;
     private static JPasswordField newPasswordField;
     private static JPasswordField confirmPasswordField;
@@ -200,7 +201,7 @@ public class PasswordChangeIFrame {
             }
         } catch (Exception ex) {
             showError("系统错误: " + ex.getMessage(), "系统错误");
-            ex.printStackTrace();
+            log.error("修改密码失败", ex);
             return;
         }
     }

@@ -16,7 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import static com.wsy.auxiliary.AuxiliaryTools.addClickListener;
 import static com.wsy.auxiliary.AuxiliaryTools.createButtons;
@@ -27,12 +29,11 @@ import static com.wsy.auxiliary.AuxiliaryTools.createRadio;
 import static com.wsy.auxiliary.AuxiliaryTools.createText;
 import com.wsy.mapper.ReaderMapper;
 import com.wsy.model.Reader;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class ReaderAddIFrame {
-    @Autowired
-    private ReaderMapper readerMapper;
-    public void setReaderMapper(ReaderMapper readerMapper) {
-        this.readerMapper = readerMapper;
-    }
+    private final ReaderMapper readerMapper;
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static JPanel createPanelTop(String[] s) {
         JPanel panelTop = new JPanel();
@@ -194,7 +195,7 @@ public class ReaderAddIFrame {
                     handleDatabaseError(frame, ex);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("添加读者失败", e);
                 JOptionPane.showMessageDialog(frame, "发生未知错误: " + e.getMessage(),
                         "错误", JOptionPane.ERROR_MESSAGE);
             }
@@ -294,7 +295,7 @@ public class ReaderAddIFrame {
         }
         JOptionPane.showMessageDialog(frame, errorMsg,
                 "数据库错误", JOptionPane.ERROR_MESSAGE);
-        ex.printStackTrace();
+        log.error("数据库操作失败", ex);
     }
     private boolean isValidIdentityCard(String id) {
         return id.matches("\\d{17}[0-9X]");

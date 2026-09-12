@@ -25,7 +25,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wsy.mapper.BookInfoMapper;
@@ -38,32 +40,15 @@ import com.wsy.model.BookType;
 import com.wsy.model.Operator;
 import com.wsy.model.Order;
 import com.wsy.model.Stockpile;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookOrderingIFrame {
-    @Autowired
-    private BookTypeMapper bookTypeMapper;
-    @Autowired
-    private OrderMapper orderMapper;
-    @Autowired
-    private BookInfoMapper bookInfoMapper;
-    @Autowired
-    private OperatorMapper operatorMapper;
-    @Autowired
-    private StockpileMapper stockpileMapper;
-    public void setBookTypeMapper(BookTypeMapper bookTypeMapper) {
-        this.bookTypeMapper = bookTypeMapper;
-    }
-    public void setOrderMapper(OrderMapper orderMapper) {
-        this.orderMapper = orderMapper;
-    }
-    public void setBookInfoMapper(BookInfoMapper bookInfoMapper) {
-        this.bookInfoMapper = bookInfoMapper;
-    }
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
-    public void setStockpileMapper(StockpileMapper stockpileMapper) {
-        this.stockpileMapper = stockpileMapper;
-    }
+    private final BookTypeMapper bookTypeMapper;
+    private final OrderMapper orderMapper;
+    private final BookInfoMapper bookInfoMapper;
+    private final OperatorMapper operatorMapper;
+    private final StockpileMapper stockpileMapper;
     private final List<java.awt.Component> bookInfoComponents = new ArrayList<>();
     private final List<java.awt.Component> orderInfoComponents = new ArrayList<>();
     private JRadioButton yesRadio;
@@ -249,7 +234,7 @@ public class BookOrderingIFrame {
                 operatorMap.put(operator.getUserName(), operator.getId());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("加载图书类别失败", e);
             categoryMap.put("计算机", "TP0001");
             categoryMap.put("文学", "I00001");
             operatorMap.put("管理员", 101);
@@ -265,7 +250,7 @@ public class BookOrderingIFrame {
                 publishers.add("人民邮电出版社");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("加载出版社失败", e);
             publishers.add("机械工业出版社");
             publishers.add("清华大学出版社");
             publishers.add("人民邮电出版社");
@@ -440,7 +425,7 @@ public class BookOrderingIFrame {
         } catch (NumberFormatException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("图书订购失败", e);
             JOptionPane.showMessageDialog(frame, "订购失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
             throw new RuntimeException(e); 
         }

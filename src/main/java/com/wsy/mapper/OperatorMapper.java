@@ -14,9 +14,9 @@ public interface OperatorMapper {
 
     int update(Operator operator);
 
-    int deleteById(Integer id);
+    int deleteById(@Param("id") Integer id);
 
-    Operator selectById(Integer id);
+    Operator selectById(@Param("id") Integer id);
 
     int updatePassword(@Param("id") Integer id, @Param("newPassword") String newPassword);
 

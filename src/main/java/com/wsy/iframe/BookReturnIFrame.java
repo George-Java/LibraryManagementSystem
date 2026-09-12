@@ -24,13 +24,18 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wsy.mapper.BorrowMapper;
 import com.wsy.mapper.OperatorMapper;
 import com.wsy.model.Borrow;
 import com.wsy.model.Operator;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookReturnIFrame {
     private JTable borrowTable;
     private DefaultTableModel tableModel;
@@ -39,16 +44,8 @@ public class BookReturnIFrame {
     private JTextField timeField;
     private JComboBox<String> operatorComboBox;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    @Autowired
-    private BorrowMapper borrowMapper;
-    @Autowired
-    private OperatorMapper operatorMapper;
-    public void setBorrowMapper(BorrowMapper borrowMapper) {
-        this.borrowMapper = borrowMapper;
-    }
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
+    private final BorrowMapper borrowMapper;
+    private final OperatorMapper operatorMapper;
     private String getCurrentTime() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -186,7 +183,7 @@ public class BookReturnIFrame {
                 tableModel.addRow(row);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("加载借阅记录失败", ex);
             JOptionPane.showMessageDialog(null, "加载借阅记录失败：" + ex.getMessage(), "数据库错误", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -269,7 +266,7 @@ public class BookReturnIFrame {
                 JOptionPane.showMessageDialog(frame, "归还操作失败！", "错误", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("图书归还失败", e);
             JOptionPane.showMessageDialog(frame, "归还失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
             throw new RuntimeException(e); 
         }

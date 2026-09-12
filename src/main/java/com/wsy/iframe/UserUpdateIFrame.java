@@ -30,20 +30,21 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import static com.wsy.auxiliary.AuxiliaryTools.setWindowCenter;
 import com.wsy.mapper.OperatorMapper;
 import com.wsy.model.Operator;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class UserUpdateIFrame {
     private JTable userTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JComboBox<String> searchTypeCombo;
-    @Autowired
-    private OperatorMapper operatorMapper;
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
+    private final OperatorMapper operatorMapper;
     public JInternalFrame createUpdateUserIFrame() throws PropertyVetoException {
         JInternalFrame frame = new JInternalFrame("用户管理", true, true, true, true);
         frame.setLayout(new BorderLayout());
@@ -419,7 +420,7 @@ public class UserUpdateIFrame {
             } else {
                 showError("更新失败: " + (message != null ? message : "未知错误"), "数据库错误");
             }
-            ex.printStackTrace();
+            log.error("更新用户失败", ex);
         }
     }
     private void deleteSelectedUser() {
@@ -456,7 +457,7 @@ public class UserUpdateIFrame {
                 } else {
                     showError("删除失败: " + ex.getMessage(), "数据库错误");
                 }
-                ex.printStackTrace();
+                log.error("删除用户失败", ex);
             }
         }
     }

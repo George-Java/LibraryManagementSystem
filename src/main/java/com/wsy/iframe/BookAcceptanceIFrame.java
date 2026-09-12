@@ -1,8 +1,18 @@
 package com.wsy.iframe;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+
+import com.wsy.mapper.OperatorMapper;
+import com.wsy.mapper.OrderMapper;
+import com.wsy.mapper.StockpileMapper;
+import com.wsy.model.Operator;
+import com.wsy.model.Stockpile;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
@@ -12,28 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
+import static com.wsy.auxiliary.AuxiliaryTools.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
-import static com.wsy.auxiliary.AuxiliaryTools.createLabel;
-import static com.wsy.auxiliary.AuxiliaryTools.createRadio;
-import static com.wsy.auxiliary.AuxiliaryTools.createText;
-import com.wsy.mapper.OperatorMapper;
-import com.wsy.mapper.OrderMapper;
-import com.wsy.mapper.StockpileMapper;
-import com.wsy.model.Operator;
-import com.wsy.model.Stockpile;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookAcceptanceIFrame {
     private final List<java.awt.Component> formComponents = new ArrayList<>();
     private String selectedBookISBN;
@@ -41,24 +34,15 @@ public class BookAcceptanceIFrame {
     private JTable orderTable;
     private DefaultTableModel tableModel;
     private JInternalFrame frame;
-    private final Map<Integer, String> operatorMap = new HashMap<>(); 
-    @Autowired
-    private OrderMapper orderMapper;
-    @Autowired
-    private OperatorMapper operatorMapper;
-    @Autowired
-    private StockpileMapper stockpileMapper;
+    private final Map<Integer, String> operatorMap = new HashMap<>();
+
+    private final OrderMapper orderMapper;
+    private final OperatorMapper operatorMapper;
+    private final StockpileMapper stockpileMapper;
+
     private JButton acceptButton; // 类级别保存验收按钮引用
     private JButton cancelButton; // 取消验收按钮（仅未验收时可用）
-    public void setOrderMapper(OrderMapper orderMapper) {
-        this.orderMapper = orderMapper;
-    }
-    public void setOperatorMapper(OperatorMapper operatorMapper) {
-        this.operatorMapper = operatorMapper;
-    }
-    public void setStockpileMapper(StockpileMapper stockpileMapper) {
-        this.stockpileMapper = stockpileMapper;
-    }
+
     private double convertToDouble(Object value) {
         if (value instanceof Float) {
             return ((Float) value).doubleValue();
@@ -70,6 +54,7 @@ public class BookAcceptanceIFrame {
             return 0.0;
         }
     }
+
     public JInternalFrame createBookAcceptanceIFrame() throws PropertyVetoException {
         loadOperatorMap();
         frame = new JInternalFrame("图书验收", true, true, true, true);
@@ -105,12 +90,12 @@ public class BookAcceptanceIFrame {
         JTextField isbnField = null;
         for (int i = 0; i < 10; i++) {
             panelCenter.add(createLabel(labels[i]));
-            if (i == 9) { 
+            if (i == 9) {
                 JPanel radioPanel = createRadio("是", "否");
                 yesRadio = (JRadioButton) radioPanel.getComponent(0);
                 noRadio = (JRadioButton) radioPanel.getComponent(1);
-                formComponents.add(yesRadio); 
-                formComponents.add(noRadio); 
+                formComponents.add(yesRadio);
+                formComponents.add(noRadio);
                 panelCenter.add(radioPanel);
             } else {
                 JTextField textField = createText();
@@ -141,11 +126,9 @@ public class BookAcceptanceIFrame {
         buttonsPanel.add(exitButton);
         panelBottom.add(buttonsPanel);
         frame.add(panelBottom, BorderLayout.SOUTH);
-        
+
         // 添加单选按钮事件监听，控制验收按钮可用性
-        ActionListener radioListener = e -> {
-            updateButtonState();
-        };
+        ActionListener radioListener = e -> updateButtonState();
         if (yesRadio != null && noRadio != null) {
             yesRadio.addActionListener(radioListener);
             noRadio.addActionListener(radioListener);
@@ -164,6 +147,7 @@ public class BookAcceptanceIFrame {
         frame.setVisible(true);
         return frame;
     }
+
     private void loadOperatorMap() {
         try {
             List<Operator> operators = operatorMapper.selectAll();
@@ -171,9 +155,10 @@ public class BookAcceptanceIFrame {
                 operatorMap.put(operator.getId(), operator.getUserName());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("加载待验收订单失败", e);
         }
     }
+
     private void loadUnacceptedOrders() {
         try {
             List<Map<String, Object>> unacceptedOrders = orderMapper.selectUnacceptedOrders();
@@ -184,8 +169,7 @@ public class BookAcceptanceIFrame {
                 LocalDate orderDate;
                 if (orderDateObj instanceof LocalDate) {
                     orderDate = (LocalDate) orderDateObj;
-                } else if (orderDateObj instanceof java.util.Date) {
-                    java.util.Date date = (java.util.Date) orderDateObj;
+                } else if (orderDateObj instanceof java.util.Date date) {
                     if (orderDateObj instanceof java.sql.Date) {
                         orderDate = new java.sql.Date(date.getTime()).toLocalDate();
                     } else {
@@ -210,9 +194,9 @@ public class BookAcceptanceIFrame {
                         bookName,
                         category,
                         orderQuantity,
-                        String.format("%.2f", discount), 
+                        String.format("%.2f", discount),
                         price,
-                        String.format("%.2f", orderPrice), 
+                        String.format("%.2f", orderPrice),
                         operatorName
                 };
                 tableModel.addRow(rowData);
@@ -225,6 +209,7 @@ public class BookAcceptanceIFrame {
             JOptionPane.showMessageDialog(frame, "加载订单数据失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void fillFormFromModelRow(int modelRowIndex) {
         try {
             int rowCount = tableModel.getRowCount();
@@ -268,10 +253,12 @@ public class BookAcceptanceIFrame {
         JOptionPane.showMessageDialog(frame, "未找到该ISBN的未验收订单: " + isbn, "提示", JOptionPane.WARNING_MESSAGE);
         clearForm();
     }
+
     private void updateAcceptButtonState() {
         // 更新按钮可用性：'是' -> 只能验收；'否' -> 只能取消
         updateButtonState();
     }
+
     private void updateButtonState() {
         boolean isAccepted = ((JRadioButton) formComponents.get(9)).isSelected(); // "是"
         boolean isNotAccepted = ((JRadioButton) formComponents.get(10)).isSelected(); // "否"
@@ -282,8 +269,9 @@ public class BookAcceptanceIFrame {
             cancelButton.setEnabled(isNotAccepted);
         }
     }
+
     @Transactional
-    private void acceptOrder() {
+    protected void acceptOrder() {
         if (selectedBookISBN == null || selectedOrderDate == null) {
             JOptionPane.showMessageDialog(frame, "请先选择要验收的订单", "提示", JOptionPane.WARNING_MESSAGE);
             return;
@@ -311,8 +299,8 @@ public class BookAcceptanceIFrame {
                 newStockpile.setStockQuantity(orderQuantity);
                 stockpileMapper.insert(newStockpile);
             }
-            loadUnacceptedOrders(); 
-            clearForm(); 
+            loadUnacceptedOrders();
+            clearForm();
             JOptionPane.showMessageDialog(frame, "图书验收成功！库存已更新。", "成功", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(frame, "订购数量格式错误", "错误", JOptionPane.ERROR_MESSAGE);
@@ -320,8 +308,9 @@ public class BookAcceptanceIFrame {
             JOptionPane.showMessageDialog(frame, "验收失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     @Transactional
-    private void cancelOrder() {
+    protected void cancelOrder() {
         if (selectedBookISBN == null || selectedOrderDate == null) {
             JOptionPane.showMessageDialog(frame, "请先选择要取消的订单", "提示", JOptionPane.WARNING_MESSAGE);
             return;
@@ -350,6 +339,7 @@ public class BookAcceptanceIFrame {
             JOptionPane.showMessageDialog(frame, "取消验收失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void clearForm() {
         selectedBookISBN = null;
         selectedOrderDate = null;
@@ -359,7 +349,7 @@ public class BookAcceptanceIFrame {
             }
         }
         if (formComponents.size() > 9) {
-            ((JRadioButton) formComponents.get(9)).setSelected(true); 
+            ((JRadioButton) formComponents.get(9)).setSelected(true);
             // 更新验收按钮状态
             updateButtonState();
         }

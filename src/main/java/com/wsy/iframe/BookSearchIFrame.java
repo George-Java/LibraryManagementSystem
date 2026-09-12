@@ -24,19 +24,20 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import static com.wsy.auxiliary.AuxiliaryTools.createButtons;
 import static com.wsy.auxiliary.AuxiliaryTools.createLabel;
 import static com.wsy.auxiliary.AuxiliaryTools.createText;
 import com.wsy.mapper.BookInfoMapper;
 import com.wsy.model.BookInfo;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookSearchIFrame {
-    @Autowired
-    private BookInfoMapper bookInfoMapper;
-    public void setBookInfoMapper(BookInfoMapper bookInfoMapper) {
-        this.bookInfoMapper = bookInfoMapper;
-    }
+    private final BookInfoMapper bookInfoMapper;
     private JTable table;
     private DefaultTableModel tableModel;
     private JInternalFrame frame;

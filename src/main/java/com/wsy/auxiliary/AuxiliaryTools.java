@@ -1,16 +1,13 @@
 package com.wsy.auxiliary;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.text.SimpleDateFormat;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import java.util.Date;
 
+@org.springframework.stereotype.Component
 public class AuxiliaryTools {
     public static void setWindowCenter(Component window) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -137,44 +134,41 @@ public class AuxiliaryTools {
 
     public static JPanel createDatePicker() {
         JPanel panel = new JPanel(new BorderLayout());
-        
+
         // 创建日期格式化文本框
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         JFormattedTextField dateTextField = new JFormattedTextField(dateFormat);
         dateTextField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        
+
         // 创建日历图标按钮
         JButton calendarButton = new JButton("📅");
-        
+
         // 创建日期选择器（使用JSpinner实现）
         SpinnerDateModel dateModel = new SpinnerDateModel();
         JSpinner dateSpinner = new JSpinner(dateModel);
         JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
         dateSpinner.setEditor(dateEditor);
-        
+
         // 将日期选择器添加到弹出菜单
         JPopupMenu popupMenu = new JPopupMenu();
         popupMenu.add(dateSpinner);
-        
+
         // 按钮点击事件：显示日期选择器
         calendarButton.addActionListener(e -> {
             popupMenu.show(calendarButton, 0, calendarButton.getHeight());
         });
-        
+
         // 日期选择器值变化事件：更新文本框
-        dateSpinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                Date selectedDate = (Date) dateSpinner.getValue();
-                dateTextField.setText(dateFormat.format(selectedDate));
-                popupMenu.setVisible(false);
-            }
+        dateSpinner.addChangeListener(e -> {
+            Date selectedDate = (Date) dateSpinner.getValue();
+            dateTextField.setText(dateFormat.format(selectedDate));
+            popupMenu.setVisible(false);
         });
-        
+
         // 组装面板
         panel.add(dateTextField, BorderLayout.CENTER);
         panel.add(calendarButton, BorderLayout.EAST);
-        
+
         return panel;
     }
 }
